@@ -125,6 +125,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  HCSR04_Task();
+
+
 	   if (HCSR04_IsDataReady())
 	    {
 	        uint32_t pulse_us = HCSR04_GetPulseWidthUs();
@@ -132,8 +135,14 @@ int main(void)
 	        int len = snprintf(
 	            uart_buf,
 	            sizeof(uart_buf),
-	            "Echo pulse: %lu us\r\n",
-	            pulse_us
+	            "Pulse:%lu us Dist:%lu mm Valid:%u Err:%u RTO:%lu FTO:%lu INV:%lu\r\n",
+	            HCSR04_GetPulseWidthUs(),
+	            HCSR04_GetDistanceMm(),
+	            HCSR04_IsDistanceValid(),
+	            HCSR04_GetLastError(),
+	            HCSR04_GetRisingTimeoutCount(),
+	            HCSR04_GetFallingTimeoutCount(),
+	            HCSR04_GetInvalidPulseCount()
 	        );
 
 	        HAL_UART_Transmit(
