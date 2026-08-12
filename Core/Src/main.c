@@ -19,6 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <stdio.h>
+#include "parking_logic.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "hcsr04.h"
@@ -104,7 +106,7 @@ int main(void)
 
 
   HCSR04_Init(&htim2);
-
+  ParkingLogic_Init();
 
 
 
@@ -128,32 +130,60 @@ int main(void)
 	  HCSR04_Task();
 
 
-	   if (HCSR04_IsDataReady())
-	    {
-	        uint32_t pulse_us = HCSR04_GetPulseWidthUs();
+	  if (HCSR04_IsDataReady())
+	  {
+	      uint32_t distance_mm =
+	          HCSR04_GetDistanceMm();
 
-	        int len = snprintf(
-	            uart_buf,
-	            sizeof(uart_buf),
-	            "Pulse:%lu us Dist:%lu mm Valid:%u Err:%u RTO:%lu FTO:%lu INV:%lu\r\n",
-	            HCSR04_GetPulseWidthUs(),
-	            HCSR04_GetDistanceMm(),
-	            HCSR04_IsDistanceValid(),
-	            HCSR04_GetLastError(),
-	            HCSR04_GetRisingTimeoutCount(),
-	            HCSR04_GetFallingTimeoutCount(),
-	            HCSR04_GetInvalidPulseCount()
-	        );
+	      uint8_t distance_valid =
+	          HCSR04_IsDistanceValid();
 
-	        HAL_UART_Transmit(
-	            &huart2,
-	            (uint8_t *)uart_buf,
-	            len,
-	            100
-	        );
+	      ParkingLogic_Update(
+	          distance_mm,
+	          distance_valid,
+	          HAL_GetTick()
+	      );
 
-	        HCSR04_ClearDataReady();
-	    }
+	      ParkingState_t parking_state =
+	          ParkingLogic_GetState();
+
+	      const char *state_str;
+
+	      switch (parking_state)
+	      {
+	          case PARKING_STATE_FREE:
+	              state_str = "FREE";
+	              break;
+
+	          case PARKING_STATE_OCCUPIED:
+	              state_str = "OCCUPIED";
+	              break;
+
+	          case PARKING_STATE_ERROR:
+	          default:
+	              state_str = "ERROR";
+	              break;
+	      }
+
+	      int len = snprintf(
+	          uart_buf,
+	          sizeof(uart_buf),
+	          "Dist:%lu mm Valid:%u Parking:%s Err:%u\r\n",
+	          (unsigned long)distance_mm,
+	          distance_valid,
+	          state_str,
+	          HCSR04_GetLastError()
+	      );
+
+	      HAL_UART_Transmit(
+	          &huart2,
+	          (uint8_t *)uart_buf,
+	          len,
+	          100
+	      );
+
+	      HCSR04_ClearDataReady();
+	  }
 
 	    uint32_t now = HAL_GetTick();
 
