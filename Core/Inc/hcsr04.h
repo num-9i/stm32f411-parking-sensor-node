@@ -23,20 +23,22 @@ typedef enum
 
 
 void HCSR04_Init(TIM_HandleTypeDef *htim);
-
 void HCSR04_StartMeasurement(void);
-
 void HCSR04_ClearDataReady(void);
-
 void HCSR04_InputCaptureCallback(TIM_HandleTypeDef *htim);
-
-
+void HCSR04_Task(void);
 
 uint32_t HCSR04_GetPulseWidthUs(void);
-
 uint8_t HCSR04_IsDataReady(void);
 
 uint32_t HCSR04_GetDistanceMm(void);
 uint8_t HCSR04_IsDistanceValid(void);
+
+HCSR04_Error_t HCSR04_GetLastError(void);
+
+uint32_t HCSR04_GetRisingTimeoutCount(void);
+uint32_t HCSR04_GetFallingTimeoutCount(void);
+uint32_t HCSR04_GetInvalidPulseCount(void);
+
 
 #endif

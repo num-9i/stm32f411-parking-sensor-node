@@ -1,29 +1,14 @@
 /* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdio.h>
-#include "parking_logic.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "hcsr04.h"
+#include "parking_logic.h"
+#include "rgb_led.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,12 +32,15 @@ TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
-static char uart_buf[64];
-
 /* USER CODE BEGIN PV */
 
 
+
+
+static char uart_buf[64];
 static uint32_t last_measure_tick = 0;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,8 +93,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
+
+
   HCSR04_Init(&htim2);
   ParkingLogic_Init();
+  RGB_LED_Init();
 
 
 
@@ -148,6 +139,23 @@ int main(void)
 	          ParkingLogic_GetState();
 
 	      const char *state_str;
+
+	      switch (parking_state)
+	      {
+	          case PARKING_STATE_FREE:
+	              RGB_LED_SetColor(RGB_LED_GREEN);
+	              break;
+
+	          case PARKING_STATE_OCCUPIED:
+	              RGB_LED_SetColor(RGB_LED_RED);
+	              break;
+
+	          case PARKING_STATE_ERROR:
+	          default:
+	              RGB_LED_SetColor(RGB_LED_BLUE);
+	              break;
+	      }
+
 
 	      switch (parking_state)
 	      {
@@ -395,7 +403,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, HCSR04_TRIG_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RGB_B_Pin|RGB_G_Pin|RGB_R_Pin|RS485_DE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RGB_R_Pin|RGB_G_Pin|RGB_B_Pin|RS485_DE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -410,8 +418,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RGB_B_Pin RGB_G_Pin RGB_R_Pin RS485_DE_Pin */
-  GPIO_InitStruct.Pin = RGB_B_Pin|RGB_G_Pin|RGB_R_Pin|RS485_DE_Pin;
+  /*Configure GPIO pins : RGB_R_Pin RGB_G_Pin RGB_B_Pin RS485_DE_Pin */
+  GPIO_InitStruct.Pin = RGB_R_Pin|RGB_G_Pin|RGB_B_Pin|RS485_DE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
