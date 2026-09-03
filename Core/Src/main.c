@@ -8,7 +8,10 @@
 #include "hcsr04.h"
 #include "parking_logic.h"
 #include "rgb_led.h"
+#include "app_config.h"
+#include "modbus_rtu.h"
 #include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,6 +43,16 @@ UART_HandleTypeDef huart2;
 static char uart_buf[64];
 static uint32_t last_measure_tick = 0;
 
+
+
+
+
+
+
+static uint8_t modbus_rx_buf[MODBUS_REQUEST_SIZE];
+static uint8_t modbus_tx_buf[MODBUS_MAX_RESPONSE_SIZE];
+
+static volatile uint8_t modbus_request_ready = 0U;
 
 /* USER CODE END PV */
 
@@ -96,22 +109,17 @@ int main(void)
 
 
   HCSR04_Init(&htim2);
+  AppConfig_Init();
   ParkingLogic_Init();
   RGB_LED_Init();
 
 
-
-
-  const char boot_msg[]= "\r\nParking Sensor Node Boot\r\n";
-
-
-  HAL_UART_Transmit(
-		  &huart2,
-		  (uint8_t *)boot_msg,
-		  sizeof(boot_msg) - 1U,
-		  100U
-
+  HAL_UART_Receive_IT(
+      &huart1,
+      modbus_rx_buf,
+      MODBUS_REQUEST_SIZE
   );
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -119,6 +127,8 @@ int main(void)
   while (1)
   {
 	  HCSR04_Task();
+
+
 
 
 	  if (HCSR04_IsDataReady())
@@ -204,6 +214,36 @@ int main(void)
 
 
 
+
+
+	    if (modbus_request_ready)
+	    {
+	        uint16_t response_len =
+	            ModbusRTU_ProcessRequest(
+	                modbus_rx_buf,
+	                MODBUS_REQUEST_SIZE,
+	                modbus_tx_buf,
+	                sizeof(modbus_tx_buf)
+	            );
+
+	        if (response_len > 0U)
+	        {
+	            HAL_UART_Transmit(
+	                &huart1,
+	                modbus_tx_buf,
+	                response_len,
+	                100U
+	            );
+	        }
+
+	        modbus_request_ready = 0U;
+
+	        HAL_UART_Receive_IT(
+	            &huart1,
+	            modbus_rx_buf,
+	            MODBUS_REQUEST_SIZE
+	        );
+	    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -403,7 +443,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, HCSR04_TRIG_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RGB_R_Pin|RGB_G_Pin|RGB_B_Pin|RS485_DE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RGB_R_Pin|RGB_G_Pin|RGB_B_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -418,8 +458,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RGB_R_Pin RGB_G_Pin RGB_B_Pin RS485_DE_Pin */
-  GPIO_InitStruct.Pin = RGB_R_Pin|RGB_G_Pin|RGB_B_Pin|RS485_DE_Pin;
+  /*Configure GPIO pins : RGB_R_Pin RGB_G_Pin RGB_B_Pin */
+  GPIO_InitStruct.Pin = RGB_R_Pin|RGB_G_Pin|RGB_B_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -434,6 +474,14 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	HCSR04_InputCaptureCallback(htim);
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart == &huart1)
+    {
+        modbus_request_ready = 1U;
+    }
 }
 /* USER CODE END 4 */
 
