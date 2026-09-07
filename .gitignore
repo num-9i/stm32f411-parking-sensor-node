@@ -9,3 +9,9 @@ Release/
 *.log
 *.tmp
 *~
+
+# KiCad temporary / local files
+**/fp-info-cache
+**/*.kicad_prl
+**/*-backups/
+**/*.lck
