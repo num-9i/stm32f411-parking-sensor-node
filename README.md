@@ -6,7 +6,7 @@ HC-SR04의 Echo pulse를 Timer Input Capture로 비동기 측정하고, 측정 �
 
 센서 상태와 설정값은 Modbus Holding Register에 매핑했으며, `0x03 Read Holding Registers`와 `0x06 Write Single Register`를 통해 외부 Modbus Master에서 조회 및 변경할 수 있도록 구현했습니다.
 
-현재는 **브레드보드 기반 펌웨어 및 RS485 실통신 검증과 NUCLEO-F411RE용 Carrier PCB 설계까지 완료**했으며, 실제 PCB 제작 및 Bring-up을 다음 단계로 진행하고 있습니다.
+현재 브레드보드 환경에서 펌웨어와 RS485 통신 검증을 완료했으며, NUCLEO-F411RE용 Carrier PCB도 Gerber/Drill 파일 생성 단계까지 완료했습니다. 실제 PCB 제작과 Bring-up은 다음 단계로 진행할 예정입니다.
 
 ## Project Status
 
@@ -24,6 +24,8 @@ HC-SR04의 Echo pulse를 Timer Input Capture로 비동기 측정하고, 측정 �
 - [x] RS485 실통신 검증
 - [x] Carrier PCB Schematic
 - [x] Carrier PCB Layout / Routing
+- [x] Carrier PCB ERC / DRC Verification
+- [x] Gerber / Drill File Generation & Inspection
 - [x] MAX3485용 PB5 DE/RE 제어 펌웨어 반영
 - [ ] UART CLI
 - [ ] PCB Fabrication
@@ -174,7 +176,7 @@ Free Threshold     = 550 mm
 
 이므로 `500 mm < distance <= 550 mm` 구간에서는 현재 상태를 유지합니다.
 
-이를 통해 임계값 주변에서 측정값이 반복적으로 변할 때 주차 상태가 빠르게 전환되는 현상을 줄였습니다.
+따라서 임계값 부근에서 측정값이 흔들려도 상태가 즉시 반복 전환되지 않습니다.
 
 거리 측정이 일정 시간 이상 유효하지 않을 경우 ERROR 상태로 전환합니다.
 
@@ -366,11 +368,13 @@ RS485_A ── 120 Ω ── JP1 ── RS485_B
 
 ![Carrier PCB RS485 Section](docs/images/pcb_3d_rs485_section.png)
 
-PCB의 배치와 라우팅을 완료했으며, GND는 B.Cu Copper Zone을 사용하도록 구성했습니다.
+PCB는 2-Layer로 구성했으며, B.Cu에 GND Copper Zone을 적용했습니다. ERC와 DRC는 모두 Error / Warning 0건을 확인했습니다.
 
-현재 전기적 미연결 항목은 없으며, 제작 전 실제 RGB LED 부품에 맞춰 D1 Footprint의 Pad / Annular Ring을 최종 확인할 예정입니다.
+구매한 Common Cathode RGB LED의 `B-G-K-R` Pin Order에 맞춰 전용 Footprint를 추가하고, D1의 Drill Diameter를 `0.8 mm`로 조정해 Annular Ring 규칙을 만족시켰습니다.
 
-KiCad 프로젝트는 다음 경로에 포함되어 있습니다.
+이후 Gerber와 PTH / NPTH Drill File을 생성하고 KiCad Gerber Viewer에서 Edge.Cuts, Copper, Solder Mask, Silkscreen, Drill Layer를 확인했습니다.
+
+KiCad 프로젝트와 제조용 출력 파일은 다음 경로에 포함되어 있습니다.
 
 ```text
 hardware/
@@ -379,8 +383,13 @@ hardware/
    ├─ parking_sensor_node.kicad_sch
    ├─ parking_sensor_node.kicad_pcb
    ├─ fp-lib-table
-   └─ footprints/
-      └─ ParkingSensor.pretty/
+   ├─ footprints/
+   │  └─ ParkingSensor.pretty/
+   │     └─ LED_D5.0mm-4_RGB_BGKR.kicad_mod
+   └─ gerber/
+      ├─ *.gbr
+      ├─ *-PTH.drl
+      └─ *-NPTH.drl
 ```
 
 ## Software Structure
@@ -427,17 +436,14 @@ Core/
 
 ## Next Step
 
-다음 단계에서는 Carrier PCB의 실제 제작과 Bring-up을 진행합니다.
+다음 단계에서는 구매한 부품이 도착한 뒤 실제 부품과 Footprint를 대조하고 Carrier PCB 제작 및 Bring-up을 진행합니다.
 
-제작 전에 다음 항목을 최종 확인합니다.
+제작 전 실물 기준으로 다음 항목을 확인할 예정입니다.
 
-- MAX3485 실제 구매 부품과 SOIC-8 Footprint 일치 여부
+- MAX3485 SOIC-8 Package
 - 3-pin RS485 Terminal Block의 5.08 mm Pitch / 방향
-- RGB LED의 Common Cathode 및 실제 Pin Order
-- RGB LED Footprint Pad / Annular Ring
-- HC-SR04 Connector 방향 및 기구 간섭
-- ERC / DRC 최종 확인
-- Gerber / Drill File 검토
+- RGB LED의 실제 Pin Order / Lead Pitch
+- HC-SR04 Connector 및 기구 간섭
 
 PCB 제작 후에는 다음 항목을 검증할 예정입니다.
 
@@ -457,4 +463,4 @@ Exception Response
 Long-term Communication Test
 ```
 
-최종적으로 브레드보드 Prototype에서 검증한 Firmware가 직접 설계한 Carrier PCB에서도 동일하게 동작하는지 확인하는 것을 목표로 합니다.
+PCB 제작 후에는 브레드보드에서 검증한 기능을 Carrier PCB에서도 동일한 순서로 Bring-up할 예정입니다.
