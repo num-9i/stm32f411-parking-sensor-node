@@ -228,11 +228,25 @@ int main(void)
 
 	        if (response_len > 0U)
 	        {
+	            /* RS485 transmit mode: DE=1, /RE=1 */
+	            HAL_GPIO_WritePin(
+	                RS485_DE_RE_GPIO_Port,
+	                RS485_DE_RE_Pin,
+	                GPIO_PIN_SET
+	            );
+
 	            HAL_UART_Transmit(
 	                &huart1,
 	                modbus_tx_buf,
 	                response_len,
 	                100U
+	            );
+
+	            /* RS485 receive mode: DE=0, /RE=0 */
+	            HAL_GPIO_WritePin(
+	                RS485_DE_RE_GPIO_Port,
+	                RS485_DE_RE_Pin,
+	                GPIO_PIN_RESET
 	            );
 	        }
 
@@ -443,7 +457,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, HCSR04_TRIG_Pin|LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RGB_R_Pin|RGB_G_Pin|RGB_B_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RGB_R_Pin|RGB_G_Pin|RGB_B_Pin|RS485_DE_RE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -458,8 +472,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RGB_R_Pin RGB_G_Pin RGB_B_Pin */
-  GPIO_InitStruct.Pin = RGB_R_Pin|RGB_G_Pin|RGB_B_Pin;
+  /*Configure GPIO pins : RGB_R_Pin RGB_G_Pin RGB_B_Pin RS485_DE_RE_Pin */
+  GPIO_InitStruct.Pin = RGB_R_Pin|RGB_G_Pin|RGB_B_Pin|RS485_DE_RE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

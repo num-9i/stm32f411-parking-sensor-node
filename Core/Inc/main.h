@@ -62,6 +62,8 @@ void Error_Handler(void);
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define RS485_DE_RE_Pin GPIO_PIN_5
+#define RS485_DE_RE_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
