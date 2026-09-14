@@ -515,7 +515,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Device:LED_KRGB"
+		(symbol "Device:LED_BGKR"
 			(pin_names
 				(offset 0)
 				(hide yes)
@@ -531,7 +531,7 @@
 					)
 				)
 			)
-			(property "Value" "LED_KRGB"
+			(property "Value" "LED_BGKR"
 				(at 0 -8.89 0)
 				(effects
 					(font
@@ -557,7 +557,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "RGB LED, cathode/red/green/blue"
+			(property "Description" "RGB LED, blue/green/cathode/red"
 				(at 0 0 0)
 				(effects
 					(font
@@ -584,7 +584,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "LED_KRGB_0_0"
+			(symbol "LED_BGKR_0_0"
 				(text "R"
 					(at 1.905 3.81 0)
 					(effects
@@ -610,7 +610,7 @@
 					)
 				)
 			)
-			(symbol "LED_KRGB_0_1"
+			(symbol "LED_BGKR_0_1"
 				(circle
 					(center -2.032 0)
 					(radius 0.254)
@@ -942,7 +942,7 @@
 					)
 				)
 			)
-			(symbol "LED_KRGB_1_1"
+			(symbol "LED_BGKR_1_1"
 				(pin passive line
 					(at -5.08 0 0)
 					(length 2.54)
@@ -953,7 +953,7 @@
 							)
 						)
 					)
-					(number "1"
+					(number "3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -971,7 +971,7 @@
 							)
 						)
 					)
-					(number "2"
+					(number "4"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -989,7 +989,7 @@
 							)
 						)
 					)
-					(number "3"
+					(number "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1007,7 +1007,7 @@
 							)
 						)
 					)
-					(number "4"
+					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -5445,7 +5445,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:LED_KRGB")
+		(lib_id "Device:LED_BGKR")
 		(at 171.45 116.84 0)
 		(mirror y)
 		(unit 1)
@@ -5462,7 +5462,7 @@
 				)
 			)
 		)
-		(property "Value" "LED_KRGB"
+		(property "Value" "LED_BGKR"
 			(at 171.45 105.41 0)
 			(effects
 				(font
@@ -5470,7 +5470,7 @@
 				)
 			)
 		)
-		(property "Footprint" "LED_THT:LED_D5.0mm-4_RGB"
+		(property "Footprint" "ParkingSensor:LED_D5.0mm-4_RGB_BGKR"
 			(at 171.45 118.11 0)
 			(effects
 				(font
@@ -5488,7 +5488,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "RGB LED, cathode/red/green/blue"
+		(property "Description" "RGB LED, blue/green/cathode/red"
 			(at 171.45 116.84 0)
 			(effects
 				(font

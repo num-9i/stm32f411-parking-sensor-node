@@ -15,3 +15,7 @@ Release/
 **/*.kicad_prl
 **/*-backups/
 **/*.lck
+
+
+# PCB manufacturing archives
+**/*_gerber.zip
